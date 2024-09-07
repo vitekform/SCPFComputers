@@ -1,0 +1,11 @@
+name: Computers
+version: '1.0'
+main: cz.vitekform.computers.Computers
+api-version: '1.20'
+authors: [ vitekform ]
+website: https://vitekform.cz
+commands:
+  register_pc:
+    description: "Zaregistruje nový počítač"
+    permission: "computers.register_new"
+    permission-message: "Na toto nemáš oprávnění!"
