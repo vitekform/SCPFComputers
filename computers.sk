@@ -1,0 +1,109 @@
+command /register_computer:
+    permission: computers.register
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        if player has permission "computers.register":
+            set {_computerTag} to short tag "computer" of nbt of target block of player
+            if {_computerTag} = 1:
+                send "&cThis computer is already registered!" to player
+            else:
+                send "&aPočítač zaregistrován!" to player
+                set {_l} to location of target block of player
+                make 5 of dust using dustOption(lime, 1) at {_l}
+                set short tag "computer" of nbt of target block of player to 1
+        else:
+            send "&cYou do not have the required permission (computers.register)!" to player
+command /unregister_computer:
+    permission: computers.unregister
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        if player has permission "computers.unregister":
+            set {_computerTag} to short tag "computer" of nbt of target block of player
+            if {_computerTag} = 1:
+                send "&aPočítač byl odregistrován!" to player
+                set {_l} to location of target block of player
+                make 5 of dust using dustOption(lime, 1) at {_l}
+                set short tag "computer" of nbt of target block of player to 0
+            else:
+                send "&cTohle není počítač!" to player
+        else:
+            send "&cYou do not have the required permission (computers.unregister)!" to player
+
+
+# Main Listener
+on rightclick:
+    if event-block is set:
+        # Get the NBT data of the block        
+        set {_nbt} to nbt of event-block
+        
+        # Extract the specific tag as a number (assuming it's a short or integer)
+        set {_computerTag} to short tag "computer" of {_nbt}
+        
+        # Check if the extracted tag equals 1
+        if {_computerTag} = 1:
+            # Extract the damage value from the player's tool
+            set {_access_level} to int tag "level" of nbt of player's tool
+            set {_override} to int tag "override" of nbt of player's tool
+
+            if {_access_level} is not number:
+                send "&cMusíš použít kartu aby jsi se přihlásil!" to player
+            else:
+                set {_inventory} to a chest inventory with 6 row named "<yellow>SCPF OS 1.5.6 AlpineBear"
+
+                set {_nothingItem} to a gray stained glass pane named "<black> "
+                if {_access_level} >= 2:
+                    set {_voiceIntercomPermLore} to "<light green>Úroveň přístupu: Dostatečná"
+                else:
+                    set {_voiceIntercomPermLore} to "<light red>Úroveň přístupu: Nedostatečná"
+                set {_voiceIntercom} to redstone torch named "<light blue>Voice Intercom" with lore "<light aqua>Rozhlásí vámi napsanou zprávu po celé Site-22" and "<light red>Zneužití se trestá!" and "<light red>Není nastavený cooldown ale jeho použití to logováno!" and {_voiceIntercomPermLore}
+
+                set slot 0 of {_inventory} to {_nothingItem}
+                set slot 1 of {_inventory} to {_nothingItem}
+                set slot 2 of {_inventory} to {_nothingItem}
+                set slot 3 of {_inventory} to {_nothingItem}
+                set slot 4 of {_inventory} to {_nothingItem}
+                set slot 5 of {_inventory} to {_nothingItem}
+                set slot 6 of {_inventory} to {_nothingItem}
+                set slot 7 of {_inventory} to {_nothingItem}
+                set slot 8 of {_inventory} to {_nothingItem}
+
+                set slot 9 of {_inventory} to {_nothingItem}
+                set slot 17 of {_inventory} to {_nothingItem}
+                set slot 18 of {_inventory} to {_nothingItem}
+                set slot 26 of {_inventory} to {_nothingItem}
+                set slot 27 of {_inventory} to {_nothingItem}
+                set slot 35 of {_inventory} to {_nothingItem}
+                set slot 36 of {_inventory} to {_nothingItem}
+                set slot 44 of {_inventory} to {_nothingItem}
+
+                set slot 45 of {_inventory} to {_nothingItem}
+                set slot 46 of {_inventory} to {_nothingItem}
+                set slot 47 of {_inventory} to {_nothingItem}
+                set slot 48 of {_inventory} to {_nothingItem}
+                set slot 49 of {_inventory} to {_nothingItem}
+                set slot 50 of {_inventory} to {_nothingItem}
+                set slot 51 of {_inventory} to {_nothingItem}
+                set slot 52 of {_inventory} to {_nothingItem}
+                set slot 53 of {_inventory} to {_nothingItem}
+
+                set slot 10 of {_inventory} to {_voiceIntercom}
+
+                open {_inventory} to player
+
+on inventory click:
+    set {_itemName} to name of event-item
+    if {_itemName} = "<black> ":
+        cancel event
+    if {_itemName} = "<light blue>Voice Intercom":
+        cancel event
+        set int tag "voiceIntercomActive" of nbt of player to 1
+        close player's inventory
+        send "<lime>Zadej zprávu kterou chceš přehrát v Intercomu..." to player
+
+on chat:
+    set {_voiceIntercomActive} to int tag "voiceIntercomActive" of nbt of player
+    if {_voiceIntercomActive} = 1:
+        execute console command "/intercom [message]"
+        set byte tag "computers;voiceIntercomActive" of nbt of player to 0
+        send "<lime>Zpráva přehrána!" to player
+        cancel event
